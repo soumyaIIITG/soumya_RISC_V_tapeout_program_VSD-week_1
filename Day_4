@@ -1,0 +1,66 @@
+Day 4 – Learnings
+
+Today I learned about Gate-Level Synthesis, Synthesis vs Simulation Mismatch, and Blocking vs Non-Blocking statements in Verilog.
+
+---
+
+ 1. Gate-Level Synthesis
+
+* Synthesis is the process of converting high-level RTL (Register Transfer Level) Verilog into a gate-level netlist composed of logic gates, flip-flops, and interconnections.
+* This netlist represents how the design will actually be implemented in hardware.
+* After synthesis, we can perform Gate-Level Simulation (GLS) to verify functionality at the netlist level and ensure the synthesized design matches the RTL behavior.
+* GLS can also include timing information (delays) to check if the design meets timing requirements.
+
+---
+
+ 2. Synthesis and Simulation Mismatch
+
+Sometimes, the behavior of a design in RTL simulation differs from the behavior after synthesis. This is called a simulation-synthesis mismatch. Common causes include:
+
+* Using blocking assignments (`=`) incorrectly in sequential logic.
+* Inferring unintended latches due to incomplete sensitivity lists or missing `else` statements.
+* Using constructs not supported by synthesis (like delays `#5`, `$display`, `$monitor`, or initializations inside procedural blocks).
+* Using `initial` blocks for logic initialization (not synthesizable on ASICs).
+
+To avoid mismatch:
+
+* Always use non-blocking assignments (`<=`) for sequential logic.
+* Keep sensitivity lists complete (or use `always @(*)` for combinational).
+* Avoid simulation-only constructs in synthesizable code.
+
+---
+
+ 3. Blocking vs Non-Blocking Statements
+
+In Verilog, there are two types of assignments inside procedural blocks:
+
+* Blocking (`=`)
+
+  * Executes statements sequentially, like in software.
+  * Each statement must complete before the next one begins.
+  * Typically used in combinational logic.
+  * Example:
+
+    ```verilog
+    a = b;   // executed first
+    c = a;   // executed after a = b
+    ```
+
+* Non-Blocking (`<=`)
+
+  * All right-hand side expressions are evaluated first, then updates happen in parallel.
+  * Suitable for sequential logic (flip-flops on clock edge).
+  * Example:
+
+    ```verilog
+    a <= b;  // schedules update
+    c <= a;  // uses old value of a, both update together
+    ```
+
+Key Rule of Thumb:
+
+* Use blocking (`=`) for combinational logic inside `always @(*)`.
+* Use non-blocking (`<=`) for sequential logic inside `always @(posedge clk)`.
+
+
+
